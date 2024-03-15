@@ -194,10 +194,9 @@ def main_diffusion_inference(pos_prompt,
             pipe.scheduler = DPMSolverSinglestepScheduler.from_config(pipe.scheduler.config)
             num_inference_steps = 40
             guidance_scale = 7
-        device = getDevice()
-        print(device)
-        pipe = merge_lora(pipe, lora_style_path, multiplier_style, from_safetensor=True, device=getDevice())
-        pipe = merge_lora(pipe, lora_human_path, multiplier_human, from_safetensor=lora_human_path.endswith('safetensors'), device=getDevice())
+
+        pipe = merge_lora(pipe, lora_style_path, multiplier_style, from_safetensor=True, device='cuda')
+        pipe = merge_lora(pipe, lora_human_path, multiplier_human, from_safetensor=lora_human_path.endswith('safetensors'), device='cuda')
     print(pipe.scheduler)
     #pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
     print(f'multiplier_style:{multiplier_style}, multiplier_human:{multiplier_human}')
