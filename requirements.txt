@@ -23,3 +23,8 @@ edge-tts
 controlnet_aux==0.0.6
 SentencePiece
 # mmcv-full (need mim install)
+
+
+# https://mmdetection.readthedocs.io/en/v2.26.0/get_started.html
+# pip install -U openmim -i https://pypi.tuna.tsinghua.edu.cn/simple
+# mim install mmcv-full
