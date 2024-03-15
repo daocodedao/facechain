@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append("/Users/linzhiji/Documents/code/facechain")
+
 import launch
 import os
 
