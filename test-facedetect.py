@@ -8,7 +8,7 @@ import platform
 
 face_detection = 'face-detection'
 
-if platform.system() == "linux":
+if platform.system() == "Linux":
     tmp_path="/data/work/facechain/worker_data/qw/training_data/ly261666/cv_portrait_model/a4_labeled/tmp.png"
     imagePath="/data/work/facechain/worker_data/qw/training_data/ly261666/cv_portrait_model/a4/000.jpg"
 else:
