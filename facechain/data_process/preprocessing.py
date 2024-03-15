@@ -216,16 +216,18 @@ class Blipv2():
     def __call__(self, imdir):
         self.model.start()
         savedir = str(imdir) + '_labeled'
+        print(f"删除并新建文件夹{savedir}")
         shutil.rmtree(savedir, ignore_errors=True)
         os.makedirs(savedir, exist_ok=True)
 
         imlist = os.listdir(imdir)
         result_list = []
         imgs_list = []
-
+        print(f"图片列表{imlist}")
         cnt = 0
         tmp_path = os.path.join(savedir, 'tmp.png')
         for imname in imlist:
+            print(f"逐个处理图片{imname}")
             try:
                 # if 1:
                 if imname.startswith('.'):
@@ -238,9 +240,11 @@ class Blipv2():
                 new_w = round(w * ratio)
                 new_h = round(h * ratio)
                 imt = cv2.resize(im, (new_w, new_h))
+                print(f"图片保存到{tmp_path}")
                 cv2.imwrite(tmp_path, imt)
                 result_det = self.face_detection(tmp_path)
                 bboxes = result_det['boxes']
+                print(f"检测人脸数量{len(bboxes)}")
                 if len(bboxes) > 1:
                     areas = []
                     for i in range(len(bboxes)):
@@ -254,19 +258,21 @@ class Blipv2():
                         continue
                     else:
                         keypoints = result_det['keypoints'][idxs[0]]
+                        print(f"人脸keypoints{keypoints}")
                 elif len(bboxes) == 0:
                     print('Detecting no face, do not use image {}.'.format(imname))
                     continue
                 else:
                     keypoints = result_det['keypoints'][0]
 
+                print(f"旋转图片")
                 im = rotate(im, keypoints)
                 ns = im.shape[0]
                 imt = cv2.resize(im, (1024, 1024))
                 cv2.imwrite(tmp_path, imt)
                 result_det = self.face_detection(tmp_path)
                 bboxes = result_det['boxes']
-
+                print(f"bboxes={bboxes}")
                 if len(bboxes) > 1:
                     areas = []
                     for i in range(len(bboxes)):
@@ -288,35 +294,42 @@ class Blipv2():
 
                 for idx in range(4):
                     bbox[idx] = bbox[idx] * ns / 1024
+                print(f"裁剪图片crop_and_resize")
                 imr = crop_and_resize(im, bbox)
                 cv2.imwrite(tmp_path, imr)
 
+                print(f"skin_retouching")
                 result = self.skin_retouching(tmp_path)
                 if (result is None or (result[OutputKeys.OUTPUT_IMG] is None)):
                     print('Cannot do skin retouching, do not use this image.')
                     continue
+                print(f"保存图片{tmp_path}")
                 cv2.imwrite(tmp_path, result[OutputKeys.OUTPUT_IMG])
 
+                print(f"segmentation_pipeline")
                 result = self.segmentation_pipeline(tmp_path)
                 mask_head = get_mask_head(result)
                 im = cv2.imread(tmp_path)
                 im = im * mask_head + 255 * (1 - mask_head)
-                # print(im.shape)
+                print(im.shape)
 
                 raw_result = self.facial_landmark_confidence_func(im)
                 if raw_result is None:
                     print('landmark quality fail...')
                     continue
-
+                
+                print("imname, raw_result['scores'][0]")
                 print(imname, raw_result['scores'][0])
                 if float(raw_result['scores'][0]) < (1 - 0.145):
                     print('landmark quality fail...')
                     continue
 
+                print(f"保存图片{os.path.join(savedir, '{}.png'.format(cnt))}")
                 cv2.imwrite(os.path.join(savedir, '{}.png'.format(cnt)), im)
                 imgs_list.append('{}.png'.format(cnt))
                 img = Image.open(os.path.join(savedir, '{}.png'.format(cnt)))
                 result = self.model.tag(img)
+                print(f"标签 model.tag")
                 print(result)
                 attribute_result = self.fair_face_attribute_func(tmp_path)
                 if cnt == 0:
