@@ -19,7 +19,7 @@ from transformers import pipeline as tpipeline
 from facechain.data_process.preprocessing import Blipv2
 from facechain.merge_lora import merge_lora
 from safetensors.torch import load_file, save_file
-from facechain.utils import *
+from facechain.utils import getDevice
 
 def _data_process_fn_process(input_img_dir):
     Blipv2()(input_img_dir)
