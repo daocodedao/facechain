@@ -324,7 +324,7 @@ class Blipv2():
                 print(im.shape)
                 print(f"开始facial_landmark_confidence_func")
                 raw_result = self.facial_landmark_confidence_func(im)
-                print(f"结束facial_landmark_confidence_func")
+                print(f"结束facial_landmark_confidence_func {raw_result}")
                 if raw_result is None:
                     print('landmark quality fail...')
                     continue
