@@ -11,7 +11,7 @@ accelerate launch facechain/train_text_to_image_lora.py \
     --sub_path=$SUB_PATH \
     --dataset_name=$DATASET_NAME \
     --output_dataset_name=$OUTPUT_DATASET_NAME \
-    --caption_column="image" \
+    --caption_column="text" \
     --resolution=512 --random_flip \
     --train_batch_size=1 \
     --num_train_epochs=200 --checkpointing_steps=5000 \
