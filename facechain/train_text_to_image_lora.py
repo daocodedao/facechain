@@ -207,6 +207,7 @@ def prepare_dataset(instance_images: list, output_dataset_dir):
 
 
 def parse_args():
+    
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
     parser.add_argument(
         "--pretrained_model_name_or_path",
@@ -529,7 +530,7 @@ DATASET_NAME_MAPPING = {
 
 
 def main():
-
+    print("--------parse_args")
     args = parse_args()
     logging_dir = os.path.join(args.output_dir, args.logging_dir)
     shutil.rmtree(args.output_dir, ignore_errors=True)
@@ -550,7 +551,7 @@ def main():
     accelerator_project_config = ProjectConfiguration(
         total_limit=args.checkpoints_total_limit, project_dir=args.output_dir, logging_dir=logging_dir
     )
-
+    print("--------init Accelerator")
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
@@ -592,6 +593,7 @@ def main():
                 repo_id=args.hub_model_id or Path(args.output_dir).name, exist_ok=True, token=args.hub_token
             ).repo_id
 
+    print("--------Download foundation Model")
     ## Download foundation Model
     model_dir = snapshot_download(args.pretrained_model_name_or_path,
                                   revision=args.revision,
@@ -680,6 +682,7 @@ def main():
             text_encoder = LoraModel(config, text_encoder)
             text_encoder = Swift.prepare_model(text_encoder, lora_config)
     else:
+        print("--------freeze parameters of models to save more memory")
         # freeze parameters of models to save more memory
         unet.requires_grad_(False)
         vae.requires_grad_(False)
@@ -716,6 +719,7 @@ def main():
 
         unet.set_attn_processor(lora_attn_procs)
 
+    print("--------Move unet, vae and text_encoder to device and cast to weight_dtype")
     # Move unet, vae and text_encoder to device and cast to weight_dtype
     vae.to(accelerator.device, dtype=weight_dtype)
     if not args.train_text_encoder:
@@ -786,6 +790,7 @@ def main():
 
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
+    print("--------load_dataset")
     dataset = load_dataset("imagefolder", data_dir=args.dataset_name)
 
     # if args.dataset_name is not None:

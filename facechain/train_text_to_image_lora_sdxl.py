@@ -208,6 +208,7 @@ def prepare_dataset(instance_images: list, output_dataset_dir):
 
 
 def parse_args():
+    print("prepare parse args")
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
     parser.add_argument(
         "--pretrained_model_name_or_path",
