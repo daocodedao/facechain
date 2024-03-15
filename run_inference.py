@@ -24,7 +24,8 @@ def generate_pos_prompt(style_model, prompt_cloth):
 styles = []
 for base_model in base_models:
     style_in_base = []
-    folder_path = f"/mnt/workspace/new_facechain/facechain/styles/{base_model['name']}"
+    folder_path = f"{os.path.dirname(os.path.abspath(__file__))}/styles/{base_model['name']}"
+    # folder_path = f"/mnt/workspace/new_facechain/facechain/styles/{base_model['name']}"
     files = os.listdir(folder_path)
     files.sort()
     for file in files:

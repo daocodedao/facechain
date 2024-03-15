@@ -1,3 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
+
 accelerate
 transformers
 onnxruntime==1.15.1
