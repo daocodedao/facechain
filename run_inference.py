@@ -3,7 +3,7 @@ import os
 import json
 from facechain.inference import GenPortrait
 import cv2
-from facechain.utils import snapshot_download
+from facechain.utils import snapshot_download, check_ffmpeg, set_spawn_method, project_dir, join_worker_data_dir
 from facechain.constants import neg_prompt, pos_prompt_with_cloth, pos_prompt_with_style, base_models
 
 
@@ -52,6 +52,8 @@ output_dir = './generated'
 base_model = base_models[0]
 style = styles[0]
 model_id = style['model_id']
+character_model = 'ly261666/cv_portrait_model'
+
 
 if model_id == None:
     style_model_path = None
@@ -71,6 +73,26 @@ if not use_pose_model:
 else:
     model_dir = snapshot_download('damo/face_chain_control_model', revision='v1.0.1')
     pose_model_path = os.path.join(model_dir, 'model_controlnet/control_v11p_sd15_openpose')
+
+
+
+folder_list = []
+for idx, tmp_character_model in enumerate(['AI-ModelScope/stable-diffusion-xl-base-1.0', character_model]):
+    folder_path = join_worker_data_dir(tmp_character_model)
+    if not os.path.exists(folder_path):
+        continue
+    else:
+        files = os.listdir(folder_path)
+        for file in files:
+            file_path = os.path.join(folder_path, file)
+            if os.path.isdir(folder_path):
+                file_lora_path = f"{file_path}/pytorch_lora_weights.bin"
+                file_lora_path_swift = f"{file_path}/swift"
+                if os.path.exists(file_lora_path) or os.path.exists(file_lora_path_swift):
+                    folder_list.append(file)
+
+character_model = 'ly261666/cv_portrait_model'
+lora_model_path = join_worker_data_dir(character_model, folder_list[0])
 
 gen_portrait = GenPortrait(pose_model_path, 
                            pose_image, 

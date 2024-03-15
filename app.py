@@ -326,17 +326,33 @@ def launch_pipeline(uuid,
     instance_data_dir = join_worker_data_dir(uuid, 'training_data', tmp_character_model, user_model)
     lora_model_path = join_worker_data_dir(uuid, tmp_character_model, user_model)
 
-    gen_portrait = GenPortrait(pose_model_path, pose_image, use_depth_control, pos_prompt, neg_prompt, style_model_path, 
-                               multiplier_style, multiplier_human, use_main_model,
-                               use_face_swap, use_post_process,
+    gen_portrait = GenPortrait(pose_model_path, 
+                               pose_image, 
+                               use_depth_control, 
+                               pos_prompt, 
+                               neg_prompt, 
+                               style_model_path, 
+                               multiplier_style, 
+                               multiplier_human, 
+                               use_main_model,
+                               use_face_swap, 
+                               use_post_process,
                                use_stylization)
 
     #gen_portrait(instance_data_dir, num_images, base_model, lora_model_path, sub_path, revision, sr_img_size, cartoon_style_idx )
     num_images = min(6, num_images)
 
     with ProcessPoolExecutor(max_workers=5) as executor:
-        future = executor.submit(gen_portrait, instance_data_dir,
-                                            num_images, base_model, lora_model_path, sub_path, revision, sr_img_size, cartoon_style_idx, use_lcm_idx=use_lcm_idx)
+        future = executor.submit(gen_portrait, 
+                                 instance_data_dir,
+                                 num_images, 
+                                 base_model, 
+                                 lora_model_path, 
+                                 sub_path, 
+                                 revision, 
+                                 sr_img_size, 
+                                 cartoon_style_idx, 
+                                 use_lcm_idx=use_lcm_idx)
         while not future.done():
             is_processing = future.running()
             if not is_processing:
