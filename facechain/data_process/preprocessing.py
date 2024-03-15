@@ -322,8 +322,9 @@ class Blipv2():
                 im = cv2.imread(tmp_path)
                 im = im * mask_head + 255 * (1 - mask_head)
                 print(im.shape)
-
+                print(f"开始facial_landmark_confidence_func")
                 raw_result = self.facial_landmark_confidence_func(im)
+                print(f"结束facial_landmark_confidence_func")
                 if raw_result is None:
                     print('landmark quality fail...')
                     continue
