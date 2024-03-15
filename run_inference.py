@@ -72,13 +72,25 @@ else:
     model_dir = snapshot_download('damo/face_chain_control_model', revision='v1.0.1')
     pose_model_path = os.path.join(model_dir, 'model_controlnet/control_v11p_sd15_openpose')
 
-gen_portrait = GenPortrait(pose_model_path, pose_image, use_depth_control, pos_prompt, neg_prompt, style_model_path,
-                           multiplier_style, multiplier_human, use_main_model,
-                           use_face_swap, use_post_process,
+gen_portrait = GenPortrait(pose_model_path, 
+                           pose_image, 
+                           use_depth_control, 
+                           pos_prompt, 
+                           neg_prompt, 
+                           style_model_path,
+                           multiplier_style, 
+                           multiplier_human, 
+                           use_main_model,
+                           use_face_swap, 
+                           use_post_process,
                            use_stylization)
 
-outputs = gen_portrait(processed_dir, num_generate, base_model['model_id'],
-                       train_output_dir, base_model['sub_path'], base_model['revision'])
+outputs = gen_portrait(input_img_dir=processed_dir, 
+                       num_gen_images=num_generate, 
+                       base_model_path=base_model['model_id'],
+                    #    train_output_dir, 
+                       sub_path=base_model['sub_path'], 
+                       revision=base_model['revision'])
 
 os.makedirs(output_dir, exist_ok=True)
 

@@ -19,7 +19,7 @@ from transformers import pipeline as tpipeline
 from facechain.data_process.preprocessing import Blipv2
 from facechain.merge_lora import merge_lora
 from safetensors.torch import load_file, save_file
-
+from facechain.utils import *
 
 def _data_process_fn_process(input_img_dir):
     Blipv2()(input_img_dir)
@@ -122,8 +122,12 @@ def get_mask(result):
     return mask_rst
 
 
-def main_diffusion_inference(pos_prompt, neg_prompt,
-                             input_img_dir, base_model_path, style_model_path, lora_model_path,
+def main_diffusion_inference(pos_prompt, 
+                             neg_prompt,
+                             input_img_dir, 
+                             base_model_path, 
+                             style_model_path, 
+                             lora_model_path,
                              use_lcm=False, 
                              multiplier_style=0.25,
                              multiplier_human=0.85):
@@ -191,8 +195,8 @@ def main_diffusion_inference(pos_prompt, neg_prompt,
             num_inference_steps = 40
             guidance_scale = 7
 
-        pipe = merge_lora(pipe, lora_style_path, multiplier_style, from_safetensor=True, device='cuda')
-        pipe = merge_lora(pipe, lora_human_path, multiplier_human, from_safetensor=lora_human_path.endswith('safetensors'), device='cuda')
+        pipe = merge_lora(pipe, lora_style_path, multiplier_style, from_safetensor=True, device=getDevice())
+        pipe = merge_lora(pipe, lora_human_path, multiplier_human, from_safetensor=lora_human_path.endswith('safetensors'), device=getDevice())
     print(pipe.scheduler)
     #pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
     print(f'multiplier_style:{multiplier_style}, multiplier_human:{multiplier_human}')
@@ -428,28 +432,57 @@ def stylization_fn(use_stylization, rank_results):
         return rank_results
 
 
-def main_model_inference(pose_model_path, pose_image, use_depth_control, pos_prompt, neg_prompt, style_model_path, multiplier_style, multiplier_human, use_main_model,
-                         input_img_dir=None, base_model_path=None, lora_model_path=None,
+def main_model_inference(pose_model_path, 
+                         pose_image, 
+                         use_depth_control, 
+                         pos_prompt, 
+                         neg_prompt, 
+                         style_model_path, 
+                         multiplier_style, 
+                         multiplier_human, 
+                         use_main_model,
+                         input_img_dir=None, 
+                         base_model_path=None, 
+                         lora_model_path=None,
                          use_lcm=False):
     if use_main_model:
         multiplier_style_kwargs = {'multiplier_style': multiplier_style} if multiplier_style is not None else {}
         multiplier_human_kwargs = {'multiplier_human': multiplier_human} if multiplier_human is not None else {}
         if pose_image is None:
-            return main_diffusion_inference(pos_prompt, neg_prompt, input_img_dir, base_model_path,
-                                            style_model_path, lora_model_path, use_lcm, 
-                                            **multiplier_style_kwargs, **multiplier_human_kwargs)
+            return main_diffusion_inference(pos_prompt, 
+                                            neg_prompt, 
+                                            input_img_dir, 
+                                            base_model_path,
+                                            style_model_path, 
+                                            lora_model_path, use_lcm, 
+                                            **multiplier_style_kwargs, 
+                                            **multiplier_human_kwargs)
         else:
             pose_image = compress_image(pose_image, 1024 * 1024)
             if use_depth_control:
-                return main_diffusion_inference_multi(pose_model_path, pose_image, pos_prompt,
-                                                      neg_prompt, input_img_dir, base_model_path, style_model_path,
-                                                      lora_model_path, use_lcm, 
-                                                      **multiplier_style_kwargs, **multiplier_human_kwargs)
+                return main_diffusion_inference_multi(pose_model_path, 
+                                                      pose_image, 
+                                                      pos_prompt,
+                                                      neg_prompt, 
+                                                      input_img_dir, 
+                                                      base_model_path, 
+                                                      style_model_path,
+                                                      lora_model_path, 
+                                                      use_lcm, 
+                                                      **multiplier_style_kwargs, 
+                                                      **multiplier_human_kwargs)
             else:
-                return main_diffusion_inference_pose(pose_model_path, pose_image, pos_prompt, neg_prompt,
-                                                     input_img_dir, base_model_path, style_model_path, lora_model_path, 
+                return main_diffusion_inference_pose(pose_model_path, 
+                                                     pose_image, 
+                                                     pos_prompt, 
+                                                     neg_prompt,
+                                                     input_img_dir, 
+                                                     base_model_path, 
+                                                     style_model_path, 
+                                                     lora_model_path, 
                                                      use_lcm, 
-                                                     **multiplier_style_kwargs, **multiplier_human_kwargs)
+                                                     **multiplier_style_kwargs,
+                                                     **multiplier_human_kwargs)
 
 
 def select_high_quality_face(input_img_dir):
@@ -529,9 +562,19 @@ def post_process_fn(use_post_process, swap_results_ori, selected_face, num_gen_i
 
 
 class GenPortrait:
-    def __init__(self, pose_model_path, pose_image, use_depth_control, pos_prompt, neg_prompt, style_model_path, multiplier_style, multiplier_human,
-                 use_main_model=True, use_face_swap=True,
-                 use_post_process=True, use_stylization=True):
+    def __init__(self, 
+                 pose_model_path, 
+                 pose_image, 
+                 use_depth_control, 
+                 pos_prompt, 
+                 neg_prompt, 
+                 style_model_path, 
+                 multiplier_style, 
+                 multiplier_human,
+                 use_main_model=True, 
+                 use_face_swap=True,
+                 use_post_process=True, 
+                 use_stylization=True):
         self.use_main_model = use_main_model
         self.use_face_swap = use_face_swap
         self.use_post_process = use_post_process
@@ -545,8 +588,16 @@ class GenPortrait:
         self.pose_image = pose_image
         self.use_depth_control = use_depth_control
 
-    def __call__(self, input_img_dir, num_gen_images=6, base_model_path=None,
-                 lora_model_path=None, sub_path=None, revision=None, sr_img_size=None, portrait_stylization_idx=None, use_lcm_idx=None):
+    def __call__(self, 
+                 input_img_dir, 
+                 num_gen_images=6, 
+                 base_model_path=None,
+                 lora_model_path=None, 
+                 sub_path=None, 
+                 revision=None, 
+                 sr_img_size=None, 
+                 portrait_stylization_idx=None, 
+                 use_lcm_idx=None):
         base_model_path = snapshot_download(base_model_path, revision=revision)
         if sub_path is not None and len(sub_path) > 0:
             base_model_path = os.path.join(base_model_path, sub_path)
@@ -556,11 +607,18 @@ class GenPortrait:
             use_lcm = True
         
         # main_model_inference PIL
-        gen_results = main_model_inference(self.pose_model_path, self.pose_image, self.use_depth_control,
-                                           self.pos_prompt, self.neg_prompt,
-                                           self.style_model_path, self.multiplier_style, self.multiplier_human,
-                                           self.use_main_model, input_img_dir=input_img_dir,
-                                           lora_model_path=lora_model_path, base_model_path=base_model_path,
+        gen_results = main_model_inference(self.pose_model_path, 
+                                           self.pose_image, 
+                                           self.use_depth_control,
+                                           self.pos_prompt, 
+                                           self.neg_prompt,
+                                           self.style_model_path, 
+                                           self.multiplier_style, 
+                                           self.multiplier_human,
+                                           self.use_main_model, 
+                                           input_img_dir=input_img_dir,
+                                           lora_model_path=lora_model_path, 
+                                           base_model_path=base_model_path,
                                            use_lcm=use_lcm)
 
         # select_high_quality_face PIL

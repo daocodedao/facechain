@@ -5,6 +5,8 @@ import subprocess
 from modelscope import snapshot_download as ms_snapshot_download
 import multiprocessing as mp
 import os
+import torch
+
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -36,7 +38,8 @@ def pre_download_models():
     snapshot_download('damo/face_chain_control_model', revision='v1.0.1')
     snapshot_download('ly261666/cv_wanx_style_model', revision='v1.0.3')
     snapshot_download('damo/face_chain_control_model', revision='v1.0.1')
-    snapshot_download('Cherrytest/zjz_mj_jiyi_small_addtxt_fromleo', revision='v1.0.0')
+    snapshot_download(
+        'Cherrytest/zjz_mj_jiyi_small_addtxt_fromleo', revision='v1.0.0')
     snapshot_download('Cherrytest/rot_bgr', revision='v1.0.0')
     snapshot_download('damo/face_frombase_c4', revision='v1.0.0')
 
@@ -47,12 +50,14 @@ def set_spawn_method():
     except RuntimeError:
         print("spawn method already set")
 
+
 def check_install(*args):
     try:
         subprocess.check_output(args, stderr=subprocess.STDOUT)
         return True
     except OSError as e:
         return False
+
 
 def check_ffmpeg():
     """
@@ -73,3 +78,8 @@ def join_worker_data_dir(*kwargs) -> str:
     Join the worker data directory with the specified sub directory.
     """
     return os.path.join(get_worker_data_dir(), *kwargs)
+
+
+def getDevice():
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps")
+    return device
