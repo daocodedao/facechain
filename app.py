@@ -812,11 +812,13 @@ class Trainer:
         shutil.rmtree(work_dir, ignore_errors=True)
         shutil.rmtree(instance_data_dir, ignore_errors=True)
 
+        print("----------prepare_dataset")
         prepare_dataset([img['name'] for img in instance_images], output_dataset_dir=instance_data_dir)
+        print("----------data_process_fn")
         data_process_fn(instance_data_dir, True)
 
         # train lora
-        print("instance_data_dir", instance_data_dir)
+        print("----------instance_data_dir", instance_data_dir)
         train_lora_fn(base_model_path=base_model_path,
                       revision=revision,
                       sub_path=sub_path,
