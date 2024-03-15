@@ -45,4 +45,4 @@ result = retina_face_detection(tmp_path)
 bboxes2 = result['boxes']
 
 print(f'face detection output: {result}.')
-print(f"检测人脸数量{len(bboxes)}")
+print(f"检测人脸数量{len(bboxes2)}")
