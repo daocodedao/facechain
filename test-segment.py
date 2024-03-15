@@ -53,7 +53,8 @@ else:
 
 print("加载模型 segmentation_pipeline")
 segmentation_pipeline = pipeline(Tasks.image_segmentation,
-                                        'damo/cv_resnet101_image-multiple-human-parsing', model_revision='v1.0.1')
+                                 'damo/cv_resnet101_image-multiple-human-parsing',
+                                   model_revision='v1.0.1')
 
 
 print(f"segmentation_pipeline")

@@ -316,7 +316,9 @@ class Blipv2():
 
                 print(f"segmentation_pipeline")
                 result = self.segmentation_pipeline(tmp_path)
+                print(f"get_mask_head")
                 mask_head = get_mask_head(result)
+                print(f"重新读取{tmp_path}")
                 im = cv2.imread(tmp_path)
                 im = im * mask_head + 255 * (1 - mask_head)
                 print(im.shape)
