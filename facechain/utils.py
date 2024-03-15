@@ -81,7 +81,7 @@ def join_worker_data_dir(*kwargs) -> str:
 
 
 def getDevice():
-    device = "cuda:0"
+    device = "cuda"
     if not torch.cuda.is_available():
         device = "mps"
     return device
