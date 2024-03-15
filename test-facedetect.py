@@ -4,14 +4,16 @@
 import cv2
 import os
 from modelscope.pipelines import pipeline
+import platform
 
 face_detection = 'face-detection'
 
-# tmp_path="/data/work/facechain/worker_data/qw/training_data/ly261666/cv_portrait_model/a4_labeled/tmp.png"
-# imagePath="/data/work/facechain/worker_data/qw/training_data/ly261666/cv_portrait_model/a4/000.jpg"
-
-tmp_path="out/tmp.png"
-imagePath="out/000.jpg"
+if platform.system() == "linux":
+    tmp_path="/data/work/facechain/worker_data/qw/training_data/ly261666/cv_portrait_model/a4_labeled/tmp.png"
+    imagePath="/data/work/facechain/worker_data/qw/training_data/ly261666/cv_portrait_model/a4/000.jpg"
+else:
+    tmp_path="out/tmp.png"
+    imagePath="out/000.jpg"
 
 face_detection = pipeline(task=face_detection, model='damo/cv_ddsar_face-detection_iclr23-damofd', model_revision='v1.1')
 
