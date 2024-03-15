@@ -311,7 +311,7 @@ class Blipv2():
                 if (result is None or (result[OutputKeys.OUTPUT_IMG] is None)):
                     print('Cannot do skin retouching, do not use this image.')
                     continue
-                print(f"保存图片{tmp_path}")
+                print(f"保存图片1{tmp_path}")
                 cv2.imwrite(tmp_path, result[OutputKeys.OUTPUT_IMG])
 
                 print(f"segmentation_pipeline")
@@ -332,7 +332,7 @@ class Blipv2():
                     print('landmark quality fail...')
                     continue
 
-                print(f"保存图片{os.path.join(savedir, '{}.png'.format(cnt))}")
+                print(f"保存图片2{os.path.join(savedir, '{}.png'.format(cnt))}")
                 cv2.imwrite(os.path.join(savedir, '{}.png'.format(cnt)), im)
                 imgs_list.append('{}.png'.format(cnt))
                 img = Image.open(os.path.join(savedir, '{}.png'.format(cnt)))
