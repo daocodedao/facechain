@@ -23,6 +23,8 @@ def merge_lora(pipeline, lora_path, multiplier, from_safetensor=False, device='c
         pipeline.unet = Swift.from_pretrained(pipeline.unet, os.path.join(lora_path, 'swift'))
         return pipeline
     else:
+        print(os.path.join(lora_path, 'pytorch_lora_weights.bin'))
+        print(os.path.join(lora_path, 'pytorch_lora_weights.safetensors'))
         if os.path.exists(os.path.join(lora_path, 'pytorch_lora_weights.bin')):
             checkpoint = torch.load(os.path.join(lora_path, 'pytorch_lora_weights.bin'), map_location=torch.device(device))
         elif os.path.exists(os.path.join(lora_path, 'pytorch_lora_weights.safetensors')):
