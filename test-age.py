@@ -69,9 +69,8 @@ os.environ['HTTPS_PROXY'] = '192.168.0.77:18808'
 
 from facelib import FaceDetector,AgeGenderEstimator
 
-detector = FaceDetector()
-faces, boxes, scores, landmarks = detector.detect_align(cv2.imread(tmp_path))
-
+face_detector = FaceDetector()
+faces, boxes, scores, landmarks = face_detector.detect_align(cv2.imread(tmp_path))
 age_gender_detector = AgeGenderEstimator()
 genders, ages = age_gender_detector.detect(faces)
 

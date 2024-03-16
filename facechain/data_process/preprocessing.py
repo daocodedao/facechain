@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 from .deepbooru import DeepDanbooru
 from utils.logger_settings import api_logger
+from facelib import FaceDetector,AgeGenderEstimator
 
 
 def crop_and_resize(im, bbox):
@@ -62,8 +63,10 @@ def pad_to_square(im):
 
 def post_process_naive(result_list, score_gender, score_age):
     # determine trigger word
-    gender = np.argmax(score_gender)
-    age = np.argmax(score_age)
+    # gender = np.argmax(score_gender)
+    # age = np.argmax(score_age)
+    gender = score_gender
+    age = score_age
     if age < 2:
         if gender == 0:
             tag_a_g = ['a boy', 'children']
@@ -219,12 +222,15 @@ class Blipv2():
         self.segmentation_pipeline = pipeline(Tasks.image_segmentation,
                                               'damo/cv_resnet101_image-multiple-human-parsing', model_revision='v1.0.1')
         
-        # https://www.modelscope.cn/models/iic/cv_resnet34_face-attribute-recognition_fairface/summary
-        api_logger.info("加载模型 人脸属性识别模型 fair_face_attribute_func")
-        api_logger.info("推理：输入图片，如存在人脸则返回人的性别以及年龄区间。")
-        self.fair_face_attribute_func = pipeline(Tasks.face_attribute_recognition,
-                                                 'damo/cv_resnet34_face-attribute-recognition_fairface', model_revision='v2.0.2')
+        # # https://www.modelscope.cn/models/iic/cv_resnet34_face-attribute-recognition_fairface/summary
+        # api_logger.info("加载模型 人脸属性识别模型 fair_face_attribute_func")
+        # api_logger.info("推理：输入图片，如存在人脸则返回人的性别以及年龄区间。")
+        # self.fair_face_attribute_func = pipeline(Tasks.face_attribute_recognition,
+        #                                          'damo/cv_resnet34_face-attribute-recognition_fairface', model_revision='v2.0.2')
         
+        api_logger.info("加载模型 人脸属性识别模型")
+        self.face_detector = FaceDetector()
+        self.age_gender_detector = AgeGenderEstimator()
         
         # # https://www.modelscope.cn/models/iic/cv_manual_facial-landmark-confidence_flcm/summary
         # api_logger.info("加载模型 FLCM人脸关键点置信度模型 facial_landmark_confidence_func")
@@ -365,13 +371,23 @@ class Blipv2():
                 api_logger.info(result)
                 
                 api_logger.info("检测年龄和性别")
-                attribute_result = self.fair_face_attribute_func(tmp_path)
-                if cnt == 0:
-                    score_gender = np.array(attribute_result['scores'][0])
-                    score_age = np.array(attribute_result['scores'][1])
+                # attribute_result = self.fair_face_attribute_func(tmp_path)
+                # if cnt == 0:
+                #     score_gender = np.array(attribute_result['scores'][0])
+                #     score_age = np.array(attribute_result['scores'][1])
+                # else:
+                #     score_gender += np.array(attribute_result['scores'][0])
+                #     score_age += np.array(attribute_result['scores'][1])
+
+                faces, boxes, scores, landmarks = self.face_detector.detect_align(cv2.imread(tmp_path))
+                genders, ages = self.age_gender_detector.detect(faces)
+                # 'Male Female'
+                if genders[0] == 'Male':
+                    score_gender = 0
                 else:
-                    score_gender += np.array(attribute_result['scores'][0])
-                    score_age += np.array(attribute_result['scores'][1])
+                    score_gender = 1
+                # int
+                score_age = ages[0]
 
                 result_list.append(result.split(', '))
                 cnt += 1
