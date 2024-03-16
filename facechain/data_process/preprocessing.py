@@ -226,10 +226,10 @@ class Blipv2():
                                                  'damo/cv_resnet34_face-attribute-recognition_fairface', model_revision='v2.0.2')
         
         
-        # https://www.modelscope.cn/models/iic/cv_manual_facial-landmark-confidence_flcm/summary
-        api_logger.info("加载模型 FLCM人脸关键点置信度模型 facial_landmark_confidence_func")
-        self.facial_landmark_confidence_func = pipeline(Tasks.face_2d_keypoints,
-                                                        'damo/cv_manual_facial-landmark-confidence_flcm', model_revision='v2.5')
+        # # https://www.modelscope.cn/models/iic/cv_manual_facial-landmark-confidence_flcm/summary
+        # api_logger.info("加载模型 FLCM人脸关键点置信度模型 facial_landmark_confidence_func")
+        # self.facial_landmark_confidence_func = pipeline(Tasks.face_2d_keypoints,
+        #                                                 'damo/cv_manual_facial-landmark-confidence_flcm', model_revision='v2.5')
 
     def __call__(self, imdir):
         api_logger.info(f"Blipv2 __call__")
@@ -356,13 +356,15 @@ class Blipv2():
                     api_logger.info('landmark quality fail...')
                     continue
 
-                api_logger.info(f"保存图片2{os.path.join(savedir, '{}.png'.format(cnt))}")
+                api_logger.info(f"保存图片2 {os.path.join(savedir, '{}.png'.format(cnt))}")
                 cv2.imwrite(os.path.join(savedir, '{}.png'.format(cnt)), im)
                 imgs_list.append('{}.png'.format(cnt))
                 img = Image.open(os.path.join(savedir, '{}.png'.format(cnt)))
                 result = self.model.tag(img)
                 api_logger.info(f"标签 model.tag")
                 api_logger.info(result)
+                
+                api_logger.info("检测年龄和性别")
                 attribute_result = self.fair_face_attribute_func(tmp_path)
                 if cnt == 0:
                     score_gender = np.array(attribute_result['scores'][0])

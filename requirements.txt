@@ -21,6 +21,7 @@ mediapipe
 python-slugify
 edge-tts
 controlnet_aux==0.0.6
+deepface
 SentencePiece
 # mmcv-full (need mim install)
 
