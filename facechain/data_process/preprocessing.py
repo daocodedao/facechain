@@ -401,7 +401,9 @@ class Blipv2():
             exit()
             # return os.path.join(savedir, "metadata.jsonl")
 
+        api_logger.info("处理年龄和性别")
         result_list = post_process_naive(result_list, score_gender, score_age)
+        api_logger.info("停止model")
         self.model.stop()
         try:
             os.remove(tmp_path)
@@ -410,6 +412,7 @@ class Blipv2():
 
         out_json_name = os.path.join(savedir, "metadata.jsonl")
         fo = open(out_json_name, 'w')
+        api_logger.info("写入json")
         for i in range(len(result_list)):
             generated_text = ", ".join(result_list[i])
             api_logger.info(imgs_list[i], generated_text)
