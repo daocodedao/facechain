@@ -9,8 +9,13 @@ from modelscope.utils.constant import  Tasks
 import numpy as np
 from utils.logger_settings import api_logger
 
-tmp_path="out/tmp.png"
 
+if platform.system() == "Linux":
+    tmp_path="/data/work/facechain/worker_data/qw/training_data/ly261666/cv_portrait_model/a9_labeled/tmp.png"
+    imagePath="/data/work/facechain/worker_data/qw/training_data/ly261666/cv_portrait_model/a9/000.jpg"
+else:
+    tmp_path="out/tmp.png"
+    imagePath="out/000.jpg"
 
 # # https://www.modelscope.cn/models/iic/cv_resnet34_face-attribute-recognition_fairface/summary
 # api_logger.info("加载模型 人脸属性识别模型 fair_face_attribute_func")
@@ -67,6 +72,7 @@ faces, boxes, scores, landmarks = detector.detect_align(cv2.imread(tmp_path))
 age_gender_detector = AgeGenderEstimator()
 genders, ages = age_gender_detector.detect(faces)
 
-
+print(genders)
+print(ages)
 print("done")
 
