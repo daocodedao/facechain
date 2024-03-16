@@ -73,9 +73,6 @@ api_logger.info(f"重新读取{tmp_path}")
 im = cv2.imread(tmp_path)
 im = im * mask_head + 255 * (1 - mask_head)
 
-im = cv2.imread(tmp_path)
-im = im * mask_head + 255 * (1 - mask_head)
-
 
 raw_result = facial_landmark_confidence_func(im)
 api_logger.info(f"结束facial_landmark_confidence_func {raw_result}")

@@ -22,18 +22,18 @@ face_detection = pipeline(task=Tasks.face_detection,
                           model_revision='v1.1',
                           device="cuda")
 
-# img_path = os.path.join(imdir, imname)
-im = cv2.imread(imagePath)
-h, w, _ = im.shape
-max_size = max(w, h)
-ratio = 1024 / max_size
-new_w = round(w * ratio)
-new_h = round(h * ratio)
+# # img_path = os.path.join(imdir, imname)
+# im = cv2.imread(imagePath)
+# h, w, _ = im.shape
+# max_size = max(w, h)
+# ratio = 1024 / max_size
+# new_w = round(w * ratio)
+# new_h = round(h * ratio)
 
-imt = cv2.resize(im, (new_w, new_h))
-print(f"图片保存到{tmp_path}")
+# imt = cv2.resize(im, (new_w, new_h))
+# print(f"图片保存到{tmp_path}")
 
-cv2.imwrite(tmp_path, imt)
+# cv2.imwrite(tmp_path, imt)
 # result_det = face_detection(tmp_path)
 # bboxes = result_det['boxes']
 # print(f"检测人脸数量{len(bboxes)}")
@@ -43,6 +43,7 @@ retina_face_detection = pipeline(Tasks.face_detection, 'damo/cv_resnet50_face-de
 # img_path = 'https://modelscope.oss-cn-beijing.aliyuncs.com/test/images/retina_face_detection.jpg'
 result = retina_face_detection(tmp_path)
 bboxes2 = result['boxes']
+scores = result['scores']
 
-print(f'face detection output: {result}.')
+print(f'face detection output: {scores[0]}.')
 print(f"检测人脸数量{len(bboxes2)}")

@@ -202,21 +202,32 @@ def get_mask_head(result):
 class Blipv2():
     def __init__(self):
         self.model = DeepDanbooru()
-        api_logger.info("加载模型 skin_retouching")
+
+        # https://www.modelscope.cn/models/iic/cv_unet_skin_retouching_torch/summary
+        api_logger.info("加载模型 人像美肤美颜模型Pytorch skin_retouching")
         self.skin_retouching = pipeline('skin-retouching-torch', model='damo/cv_unet_skin_retouching_torch', model_revision='v1.0.1')
+        
+        
         # ToDo: face detection
-        api_logger.info("加载模型 face_detection")
+        # https://www.modelscope.cn/models/iic/cv_resnet50_face-detection_retinaface/summary
+        api_logger.info("加载人脸检测模型 人脸检测关键点 face_detection")
         # self.face_detection = pipeline(task=Tasks.face_detection, model='damo/cv_ddsar_face-detection_iclr23-damofd', model_revision='v1.1')
         self.face_detection = pipeline(Tasks.face_detection, 'damo/cv_resnet50_face-detection_retinaface')
 
         # self.mog_face_detection_func = pipeline(Tasks.face_detection, 'damo/cv_resnet101_face-detection_cvpr22papermogface')
-        api_logger.info("加载模型 segmentation_pipeline")
+        api_logger.info("加载模型 M2FP多人人体解析模型 segmentation_pipeline")
         self.segmentation_pipeline = pipeline(Tasks.image_segmentation,
                                               'damo/cv_resnet101_image-multiple-human-parsing', model_revision='v1.0.1')
-        api_logger.info("加载模型 fair_face_attribute_func")
+        
+        # https://www.modelscope.cn/models/iic/cv_resnet34_face-attribute-recognition_fairface/summary
+        api_logger.info("加载模型 人脸属性识别模型 fair_face_attribute_func")
+        api_logger.info("推理：输入图片，如存在人脸则返回人的性别以及年龄区间。")
         self.fair_face_attribute_func = pipeline(Tasks.face_attribute_recognition,
                                                  'damo/cv_resnet34_face-attribute-recognition_fairface', model_revision='v2.0.2')
-        api_logger.info("加载模型 facial_landmark_confidence_func")
+        
+        
+        # https://www.modelscope.cn/models/iic/cv_manual_facial-landmark-confidence_flcm/summary
+        api_logger.info("加载模型 FLCM人脸关键点置信度模型 facial_landmark_confidence_func")
         self.facial_landmark_confidence_func = pipeline(Tasks.face_2d_keypoints,
                                                         'damo/cv_manual_facial-landmark-confidence_flcm', model_revision='v2.5')
 
@@ -318,21 +329,30 @@ class Blipv2():
                 result = self.segmentation_pipeline(tmp_path)
                 api_logger.info(f"get_mask_head")
                 mask_head = get_mask_head(result)
-                api_logger.info(f"get_mask_head {mask_head}")
+                # api_logger.info(f"get_mask_head {mask_head}")
                 api_logger.info(f"重新读取{tmp_path}")
                 im = cv2.imread(tmp_path)
                 im = im * mask_head + 255 * (1 - mask_head)
-                api_logger.info(im.shape)
-                api_logger.info(f"开始facial_landmark_confidence_func")
-                raw_result = self.facial_landmark_confidence_func(im)
-                api_logger.info(f"结束facial_landmark_confidence_func {raw_result}")
-                if raw_result is None:
+
+
+                api_logger.info(f"开始 人脸置信检测，打分")
+                # api_logger.info(f"开始 facial_landmark_confidence_func")
+                # raw_result = self.facial_landmark_confidence_func(im)
+                # if raw_result is None:
+                #     api_logger.info('landmark quality fail...')
+                #     continue
+                # api_logger.info(f"facial_landmark_confidence_func 分数, {raw_result['scores'][0]}")
+                # if float(raw_result['scores'][0]) < (1 - 0.145):
+                #     api_logger.info('landmark quality fail...')
+                #     continue
+
+                result_det = self.face_detection(tmp_path)
+                scores = result['scores']
+                if len(scores) == 0:
                     api_logger.info('landmark quality fail...')
                     continue
-                
-                api_logger.info("imname, raw_result['scores'][0]")
-                api_logger.info(imname, raw_result['scores'][0])
-                if float(raw_result['scores'][0]) < (1 - 0.145):
+                api_logger.info(f"分数, {scores[0]}")
+                if float(scores[0]) < (1 - 0.145):
                     api_logger.info('landmark quality fail...')
                     continue
 
