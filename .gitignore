@@ -136,3 +136,4 @@ ast_index_file.py
 worker_data/
 processed/
 processed_labeled/
+logs/

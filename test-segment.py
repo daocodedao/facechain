@@ -8,6 +8,8 @@ from modelscope.pipelines import pipeline
 import platform
 from modelscope.utils.constant import  Tasks
 import numpy as np
+from utils.logger_settings import api_logger
+
 
 def get_mask_head(result):
     masks = result['masks']
@@ -40,6 +42,7 @@ def get_mask_head(result):
     mask_head = np.zeros((512, 512)).astype(np.uint8)
     cv2.fillPoly(mask_head, [contours[max_idx]], 255)
     mask_head = mask_head.astype(np.float32) / 255
+    # mask_head = mask_head.reshape(1024,731)
     mask_head = np.clip(mask_head + mask_face, 0, 1)
     mask_head = np.expand_dims(mask_head, 2)
     return mask_head
@@ -51,16 +54,16 @@ else:
     tmp_path="out/tmp.png"
 
 
-print("加载模型 segmentation_pipeline")
+api_logger.info("加载模型 segmentation_pipeline")
 segmentation_pipeline = pipeline(Tasks.image_segmentation,
                                  'damo/cv_resnet101_image-multiple-human-parsing',
                                    model_revision='v1.0.1')
 
 
-print(f"segmentation_pipeline")
+api_logger.info(f"segmentation_pipeline")
 result = segmentation_pipeline(tmp_path)
 
-print(f"segmentation_pipeline={result}")
+api_logger.info(f"segmentation_pipeline={result}")
 
-# mask_head = get_mask_head(result)
-# print(f"segmentation_pipeline={mask_head}")
+mask_head = get_mask_head(result)
+api_logger.info(f"segmentation_pipeline={mask_head}")

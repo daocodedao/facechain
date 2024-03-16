@@ -9,6 +9,7 @@ from modelscope.pipelines import pipeline
 import platform
 from modelscope.utils.constant import  Tasks
 import numpy as np
+from utils.logger_settings import api_logger
 
 
 def get_mask_head(result):
@@ -54,21 +55,21 @@ else:
     imagePath="out/000.jpg"
 
 
-print("加载模型 segmentation_pipeline")
+api_logger.info("加载模型 segmentation_pipeline")
 segmentation_pipeline = pipeline(Tasks.image_segmentation,
                                  'damo/cv_resnet101_image-multiple-human-parsing',
                                    model_revision='v1.0.1')
 
-print("加载模型 facial_landmark_confidence_func")
+api_logger.info("加载模型 facial_landmark_confidence_func")
 facial_landmark_confidence_func = pipeline(Tasks.face_2d_keypoints,
                                                 'damo/cv_manual_facial-landmark-confidence_flcm', model_revision='v2.5')
 
 
-print(f"segmentation_pipeline")
+api_logger.info(f"segmentation_pipeline")
 result = segmentation_pipeline(tmp_path)
-print(f"get_mask_head")
+api_logger.info(f"get_mask_head")
 mask_head = get_mask_head(result)
-print(f"重新读取{tmp_path}")
+api_logger.info(f"重新读取{tmp_path}")
 im = cv2.imread(tmp_path)
 im = im * mask_head + 255 * (1 - mask_head)
 
@@ -77,4 +78,4 @@ im = im * mask_head + 255 * (1 - mask_head)
 
 
 raw_result = facial_landmark_confidence_func(im)
-print(f"结束facial_landmark_confidence_func {raw_result}")
+api_logger.info(f"结束facial_landmark_confidence_func {raw_result}")
