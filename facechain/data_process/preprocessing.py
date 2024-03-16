@@ -415,7 +415,7 @@ class Blipv2():
         api_logger.info("写入json")
         for i in range(len(result_list)):
             generated_text = ", ".join(result_list[i])
-            api_logger.info(imgs_list[i], generated_text)
+            print(imgs_list[i], generated_text)
             info_dict = {"file_name": imgs_list[i], "text": "<fcsks>, " + generated_text}
             fo.write(json.dumps(info_dict) + '\n')
         fo.close()
