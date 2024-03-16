@@ -14,8 +14,9 @@ from PIL import Image
 from tqdm import tqdm
 
 from .deepbooru import DeepDanbooru
-from utils.logger_settings import api_logger
 from facelib import FaceDetector,AgeGenderEstimator
+
+# from utils.logger_settings import api_logger
 
 
 def crop_and_resize(im, bbox):
@@ -207,52 +208,52 @@ class Blipv2():
         self.model = DeepDanbooru()
 
         # https://www.modelscope.cn/models/iic/cv_unet_skin_retouching_torch/summary
-        api_logger.info("加载模型 人像美肤美颜模型Pytorch skin_retouching")
+        print("加载模型 人像美肤美颜模型Pytorch skin_retouching")
         self.skin_retouching = pipeline('skin-retouching-torch', model='damo/cv_unet_skin_retouching_torch', model_revision='v1.0.1')
         
         
         # ToDo: face detection
         # https://www.modelscope.cn/models/iic/cv_resnet50_face-detection_retinaface/summary
-        api_logger.info("加载人脸检测模型 人脸检测关键点 face_detection")
+        print("加载人脸检测模型 人脸检测关键点 face_detection")
         # self.face_detection = pipeline(task=Tasks.face_detection, model='damo/cv_ddsar_face-detection_iclr23-damofd', model_revision='v1.1')
         self.face_detection = pipeline(Tasks.face_detection, 'damo/cv_resnet50_face-detection_retinaface')
 
         # self.mog_face_detection_func = pipeline(Tasks.face_detection, 'damo/cv_resnet101_face-detection_cvpr22papermogface')
-        api_logger.info("加载模型 M2FP多人人体解析模型 segmentation_pipeline")
+        print("加载模型 M2FP多人人体解析模型 segmentation_pipeline")
         self.segmentation_pipeline = pipeline(Tasks.image_segmentation,
                                               'damo/cv_resnet101_image-multiple-human-parsing', model_revision='v1.0.1')
         
         # # https://www.modelscope.cn/models/iic/cv_resnet34_face-attribute-recognition_fairface/summary
-        # api_logger.info("加载模型 人脸属性识别模型 fair_face_attribute_func")
-        # api_logger.info("推理：输入图片，如存在人脸则返回人的性别以及年龄区间。")
+        # print("加载模型 人脸属性识别模型 fair_face_attribute_func")
+        # print("推理：输入图片，如存在人脸则返回人的性别以及年龄区间。")
         # self.fair_face_attribute_func = pipeline(Tasks.face_attribute_recognition,
         #                                          'damo/cv_resnet34_face-attribute-recognition_fairface', model_revision='v2.0.2')
         
-        api_logger.info("加载模型 人脸属性识别模型")
+        print("加载模型 人脸属性识别模型")
         self.face_detector = FaceDetector()
         self.age_gender_detector = AgeGenderEstimator()
         
         # # https://www.modelscope.cn/models/iic/cv_manual_facial-landmark-confidence_flcm/summary
-        # api_logger.info("加载模型 FLCM人脸关键点置信度模型 facial_landmark_confidence_func")
+        # print("加载模型 FLCM人脸关键点置信度模型 facial_landmark_confidence_func")
         # self.facial_landmark_confidence_func = pipeline(Tasks.face_2d_keypoints,
         #                                                 'damo/cv_manual_facial-landmark-confidence_flcm', model_revision='v2.5')
 
     def __call__(self, imdir):
-        api_logger.info(f"Blipv2 __call__")
+        print(f"Blipv2 __call__")
         self.model.start()
         savedir = str(imdir) + '_labeled'
-        api_logger.info(f"删除并新建文件夹{savedir}")
+        print(f"删除并新建文件夹{savedir}")
         shutil.rmtree(savedir, ignore_errors=True)
         os.makedirs(savedir, exist_ok=True)
 
         imlist = os.listdir(imdir)
         result_list = []
         imgs_list = []
-        api_logger.info(f"图片列表{imlist}")
+        print(f"图片列表{imlist}")
         cnt = 0
         tmp_path = os.path.join(savedir, 'tmp.png')
         for imname in imlist:
-            api_logger.info(f"逐个处理图片{imname}")
+            print(f"逐个处理图片{imname}")
             try:
                 # if 1:
                 if imname.startswith('.'):
@@ -265,11 +266,11 @@ class Blipv2():
                 new_w = round(w * ratio)
                 new_h = round(h * ratio)
                 imt = cv2.resize(im, (new_w, new_h))
-                api_logger.info(f"图片保存到{tmp_path}")
+                print(f"图片保存到{tmp_path}")
                 cv2.imwrite(tmp_path, imt)
                 result_det = self.face_detection(tmp_path)
                 bboxes = result_det['boxes']
-                api_logger.info(f"检测人脸数量{len(bboxes)}")
+                print(f"检测人脸数量{len(bboxes)}")
                 if len(bboxes) > 1:
                     areas = []
                     for i in range(len(bboxes)):
@@ -279,25 +280,25 @@ class Blipv2():
                     areas_new = np.sort(areas)[::-1]
                     idxs = np.argsort(areas)[::-1]
                     if areas_new[0] < 4 * areas_new[1]:
-                        api_logger.info('Detecting multiple faces, do not use image {}.'.format(imname))
+                        print('Detecting multiple faces, do not use image {}.'.format(imname))
                         continue
                     else:
                         keypoints = result_det['keypoints'][idxs[0]]
-                        api_logger.info(f"人脸keypoints{keypoints}")
+                        print(f"人脸keypoints{keypoints}")
                 elif len(bboxes) == 0:
-                    api_logger.info('Detecting no face, do not use image {}.'.format(imname))
+                    print('Detecting no face, do not use image {}.'.format(imname))
                     continue
                 else:
                     keypoints = result_det['keypoints'][0]
 
-                api_logger.info(f"旋转图片")
+                print(f"旋转图片")
                 im = rotate(im, keypoints)
                 ns = im.shape[0]
                 imt = cv2.resize(im, (1024, 1024))
                 cv2.imwrite(tmp_path, imt)
                 result_det = self.face_detection(tmp_path)
                 bboxes = result_det['boxes']
-                api_logger.info(f"bboxes={bboxes}")
+                print(f"bboxes={bboxes}")
                 if len(bboxes) > 1:
                     areas = []
                     for i in range(len(bboxes)):
@@ -307,70 +308,70 @@ class Blipv2():
                     areas_new = np.sort(areas)[::-1]
                     idxs = np.argsort(areas)[::-1]
                     if areas_new[0] < 4 * areas_new[1]:
-                        api_logger.info('Detecting multiple faces after rotation, do not use image {}.'.format(imname))
+                        print('Detecting multiple faces after rotation, do not use image {}.'.format(imname))
                         continue
                     else:
                         bbox = bboxes[idxs[0]]
                 elif len(bboxes) == 0:
-                    api_logger.info('Detecting no face after rotation, do not use this image {}'.format(imname))
+                    print('Detecting no face after rotation, do not use this image {}'.format(imname))
                     continue
                 else:
                     bbox = bboxes[0]
 
                 for idx in range(4):
                     bbox[idx] = bbox[idx] * ns / 1024
-                api_logger.info(f"裁剪图片crop_and_resize")
+                print(f"裁剪图片crop_and_resize")
                 imr = crop_and_resize(im, bbox)
                 cv2.imwrite(tmp_path, imr)
 
-                api_logger.info(f"skin_retouching")
+                print(f"skin_retouching")
                 result = self.skin_retouching(tmp_path)
                 if (result is None or (result[OutputKeys.OUTPUT_IMG] is None)):
-                    api_logger.info('Cannot do skin retouching, do not use this image.')
+                    print('Cannot do skin retouching, do not use this image.')
                     continue
-                api_logger.info(f"保存图片1{tmp_path}")
+                print(f"保存图片1{tmp_path}")
                 cv2.imwrite(tmp_path, result[OutputKeys.OUTPUT_IMG])
 
-                api_logger.info(f"segmentation_pipeline")
+                print(f"segmentation_pipeline")
                 result = self.segmentation_pipeline(tmp_path)
-                api_logger.info(f"get_mask_head")
+                print(f"get_mask_head")
                 mask_head = get_mask_head(result)
-                # api_logger.info(f"get_mask_head {mask_head}")
-                api_logger.info(f"重新读取{tmp_path}")
+                # print(f"get_mask_head {mask_head}")
+                print(f"重新读取{tmp_path}")
                 im = cv2.imread(tmp_path)
                 im = im * mask_head + 255 * (1 - mask_head)
 
 
-                api_logger.info(f"开始 人脸置信检测，打分")
-                # api_logger.info(f"开始 facial_landmark_confidence_func")
+                print(f"开始 人脸置信检测，打分")
+                # print(f"开始 facial_landmark_confidence_func")
                 # raw_result = self.facial_landmark_confidence_func(im)
                 # if raw_result is None:
-                #     api_logger.info('landmark quality fail...')
+                #     print('landmark quality fail...')
                 #     continue
-                # api_logger.info(f"facial_landmark_confidence_func 分数, {raw_result['scores'][0]}")
+                # print(f"facial_landmark_confidence_func 分数, {raw_result['scores'][0]}")
                 # if float(raw_result['scores'][0]) < (1 - 0.145):
-                #     api_logger.info('landmark quality fail...')
+                #     print('landmark quality fail...')
                 #     continue
 
                 result_det = self.face_detection(tmp_path)
                 scores = result['scores']
                 if len(scores) == 0:
-                    api_logger.info('landmark quality fail...')
+                    print('landmark quality fail...')
                     continue
-                api_logger.info(f"分数, {scores[0]}")
+                print(f"分数, {scores[0]}")
                 if float(scores[0]) < (1 - 0.145):
-                    api_logger.info('landmark quality fail...')
+                    print('landmark quality fail...')
                     continue
 
-                api_logger.info(f"保存图片2 {os.path.join(savedir, '{}.png'.format(cnt))}")
+                print(f"保存图片2 {os.path.join(savedir, '{}.png'.format(cnt))}")
                 cv2.imwrite(os.path.join(savedir, '{}.png'.format(cnt)), im)
                 imgs_list.append('{}.png'.format(cnt))
                 img = Image.open(os.path.join(savedir, '{}.png'.format(cnt)))
                 result = self.model.tag(img)
-                api_logger.info(f"标签 model.tag")
-                api_logger.info(result)
+                print(f"标签 model.tag")
+                print(result)
                 
-                api_logger.info("检测年龄和性别")
+                print("检测年龄和性别")
                 # attribute_result = self.fair_face_attribute_func(tmp_path)
                 # if cnt == 0:
                 #     score_gender = np.array(attribute_result['scores'][0])
@@ -392,27 +393,27 @@ class Blipv2():
                 result_list.append(result.split(', '))
                 cnt += 1
             except Exception as e:
-                api_logger.info('cathed for image process of ' + imname)
-                api_logger.info(f'Error: {e}')
+                print('cathed for image process of ' + imname)
+                print(f'Error: {e}')
 
-        api_logger.info(result_list)
+        print(result_list)
         if len(result_list) == 0:
-            api_logger.info('Error: result is empty.')
+            print('Error: result is empty.')
             exit()
             # return os.path.join(savedir, "metadata.jsonl")
 
-        api_logger.info("处理年龄和性别")
+        print("处理年龄和性别")
         result_list = post_process_naive(result_list, score_gender, score_age)
-        api_logger.info("停止model")
+        print("停止model")
         self.model.stop()
         try:
             os.remove(tmp_path)
         except OSError as e:
-            api_logger.info(f"Failed to remove path {tmp_path}: {e}")
+            print(f"Failed to remove path {tmp_path}: {e}")
 
         out_json_name = os.path.join(savedir, "metadata.jsonl")
         fo = open(out_json_name, 'w')
-        api_logger.info("写入json")
+        print("写入json")
         for i in range(len(result_list)):
             generated_text = ", ".join(result_list[i])
             print(imgs_list[i], generated_text)
