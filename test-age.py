@@ -9,7 +9,7 @@ from modelscope.utils.constant import  Tasks
 import numpy as np
 from utils.logger_settings import api_logger
 
-tmp_path="out/0.png"
+tmp_path="out/tmp.png"
 
 
 # # https://www.modelscope.cn/models/iic/cv_resnet34_face-attribute-recognition_fairface/summary
@@ -42,23 +42,31 @@ tmp_path="out/0.png"
 
 # # the output contains boxes and labels
 # print(output)
-# # else:
-# #     score_gender += np.array(attribute_result['scores'][0])
-# #     score_age += np.array(attribute_result['scores'][1])
-
-# pip install pyagender
-# from pyagender import PyAgender
+# else:
+#     score_gender += np.array(attribute_result['scores'][0])
+#     score_age += np.array(attribute_result['scores'][1])
 
 
-# faces = agender.detect_genders_ages(cv2.imread(tmp_path))
-
-# print(f"faces={faces}")
 
 
-from deepface import DeepFace
-import cv2
-import matplotlib.pyplot as plt
+# from deepface import DeepFace
+# import cv2
+# import matplotlib.pyplot as plt
 
-img1 = cv2.imread(tmp_path)
-result = DeepFace.analyze(img1, actions=['age', 'gender'])
-print(result)
+# img1 = cv2.imread(tmp_path)
+# # result = DeepFace.analyze(img1, actions=['age', 'gender'])
+# result = DeepFace.analyze(img_path=img1, actions=['gender', 'race'], detector_backend = "yolov8", enforce_detection=False)
+# print(result)
+
+
+from facelib import FaceDetector,AgeGenderEstimator
+
+detector = FaceDetector()
+faces, boxes, scores, landmarks = detector.detect_align(cv2.imread(tmp_path))
+
+age_gender_detector = AgeGenderEstimator()
+genders, ages = age_gender_detector.detect(faces)
+
+
+print("done")
+
