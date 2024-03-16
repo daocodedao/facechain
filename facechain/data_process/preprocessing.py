@@ -16,8 +16,6 @@ from tqdm import tqdm
 from .deepbooru import DeepDanbooru
 from facelib import FaceDetector,AgeGenderEstimator
 
-# from utils.logger_settings import api_logger
-
 
 def crop_and_resize(im, bbox):
     h, w, _ = im.shape
