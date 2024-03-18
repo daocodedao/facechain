@@ -161,7 +161,7 @@ class FaceSwap:
     def generate_name(self, p1, p2):
         return os.path.splitext(os.path.basename(p1))[0], os.path.splitext(os.path.basename(p2))[0]
     
-    def __init__(self, template_face, user, outPath):
+    def __init__(self, template_face, user):
         print("Started Swap")
 
         im1, landmarks1 = self.read_im_and_landmarks(str(template_face))
