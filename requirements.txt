@@ -3,7 +3,7 @@
 accelerate
 transformers
 onnxruntime==1.15.1
-diffuser==0.23.0
+diffuser
 invisible-watermark>=0.2.0
 modelscope==1.10.0
 Pillow
