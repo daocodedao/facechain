@@ -63,14 +63,17 @@ else:
 # result = DeepFace.analyze(img_path=img1, actions=['gender', 'race'], detector_backend = "yolov8", enforce_detection=False)
 # print(result)
 
-os.environ['HTTP_PROXY'] = '192.168.0.77:18808'
-os.environ['HTTPS_PROXY'] = '192.168.0.77:18808'
+# os.environ['HTTP_PROXY'] = '192.168.0.77:18808'
+# os.environ['HTTPS_PROXY'] = '192.168.0.77:18808'
 
 
 from facelib import FaceDetector,AgeGenderEstimator
 
 face_detector = FaceDetector()
 faces, boxes, scores, landmarks = face_detector.detect_align(cv2.imread(tmp_path))
+print(type(scores))
+print(scores)
+print(float(scores[0][0]))
 age_gender_detector = AgeGenderEstimator()
 genders, ages = age_gender_detector.detect(faces)
 

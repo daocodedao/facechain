@@ -20,6 +20,8 @@ from facechain.data_process.preprocessing import Blipv2
 from facechain.merge_lora import merge_lora
 from safetensors.torch import load_file, save_file
 from facechain.utils import getDevice
+from facelib import FaceDetector,AgeGenderEstimator
+
 
 def _data_process_fn_process(input_img_dir):
     Blipv2()(input_img_dir)
@@ -490,7 +492,10 @@ def select_high_quality_face(input_img_dir):
     quality_score_list = []
     abs_img_path_list = []
     ## TODO
-    face_quality_func = pipeline(Tasks.face_quality_assessment, 'damo/cv_manual_face-quality-assessment_fqa', model_revision='v2.0')
+    # face_quality_func = pipeline(Tasks.face_quality_assessment, 'damo/cv_manual_face-quality-assessment_fqa', model_revision='v2.0')
+    
+    face_detector = FaceDetector()
+
 
     for img_name in os.listdir(input_img_dir):
         if img_name.endswith('jsonl') or img_name.startswith('.ipynb') or img_name.startswith('.safetensors'):
@@ -498,7 +503,9 @@ def select_high_quality_face(input_img_dir):
         
         if img_name.endswith('jpg') or img_name.endswith('png'):
             abs_img_name = os.path.join(input_img_dir, img_name)
-            face_quality_score = face_quality_func(abs_img_name)[OutputKeys.SCORES]
+            # face_quality_score = face_quality_func(abs_img_name)[OutputKeys.SCORES]
+            faces, boxes, scores, landmarks = face_detector.detect_align(cv2.imread(abs_img_name))
+            face_quality_score = float(scores[0][0])
             if face_quality_score is None:
                 quality_score_list.append(0)
             else:

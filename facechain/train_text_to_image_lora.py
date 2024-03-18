@@ -560,7 +560,6 @@ def main():
         mixed_precision=args.mixed_precision,
         log_with=args.report_to,
         project_config=accelerator_project_config,
-        device_placement=[True, False]
     )
     if args.report_to == "wandb":
         if not is_wandb_available():

@@ -179,7 +179,10 @@ def train_lora_fn(base_model_path=None, revision=None, sub_path=None, output_img
                 #f'--use_swift '
                 #f'--resume_from_checkpoint="fromfacecommon"')
         else:
+            # CUDA_VISIBLE_DEVICES="0" accelerate launch {script_name.py} --arg1 --arg2 ...
+            
             res = os.system(
+                f'CUDA_VISIBLE_DEVICES="0" '
                 f'PYTHONPATH=. accelerate launch {train_script_path} '
                 f'--pretrained_model_name_or_path={base_model_path} '
                 f'--revision={revision} '
