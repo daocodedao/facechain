@@ -69,6 +69,8 @@ from torch import multiprocessing
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from facechain.inference import data_process_fn
+from accelerate import DistributedDataParallelKwargs
+
 
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
 check_min_version("0.14.0.dev0")
@@ -552,12 +554,13 @@ def main():
         total_limit=args.checkpoints_total_limit, project_dir=args.output_dir, logging_dir=logging_dir
     )
     print("--------init Accelerator")
+    # ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
         log_with=args.report_to,
         project_config=accelerator_project_config,
-        distributed_type="NO"
+        device_placement=[True, False]
     )
     if args.report_to == "wandb":
         if not is_wandb_available():
