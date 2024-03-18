@@ -23,6 +23,7 @@ edge-tts
 controlnet_aux==0.0.6
 # argparse
 SentencePiece
+dlib
 # facelib
 git+https://github.com/sajjjadayobi/FaceLib.git
 # mmcv-full (need mim install)
