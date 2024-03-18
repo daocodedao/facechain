@@ -539,7 +539,7 @@ def main():
     if args.dataset_name is not None:
         # if dataset_name is None, then it's called from the gradio
         # the data processing will be executed in the app.py to save the gpu memory.
-        print('All input images:', args.dataset_name)
+        print('------------All input images:', args.dataset_name)
         args.dataset_name = [os.path.join(args.dataset_name, x) for x in os.listdir(args.dataset_name)]
         shutil.rmtree(args.output_dataset_name, ignore_errors=True)
         prepare_dataset(args.dataset_name, args.output_dataset_name)
@@ -557,6 +557,7 @@ def main():
         mixed_precision=args.mixed_precision,
         log_with=args.report_to,
         project_config=accelerator_project_config,
+        distributed_type="NO"
     )
     if args.report_to == "wandb":
         if not is_wandb_available():
@@ -790,7 +791,7 @@ def main():
 
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
-    print("--------load_dataset")
+    print("--------加载数据集")
     dataset = load_dataset("imagefolder", data_dir=args.dataset_name)
 
     # if args.dataset_name is not None:
@@ -817,7 +818,7 @@ def main():
     # Preprocessing the datasets.
     # We need to tokenize inputs and targets.
     column_names = dataset["train"].column_names
-    print(f"column_names={column_names}")
+    print(f"------------column_names={column_names}")
     # 6. Get the column names for input/target.
     dataset_columns = DATASET_NAME_MAPPING.get(args.dataset_name, None)
     
@@ -858,6 +859,7 @@ def main():
         )
         return inputs.input_ids
 
+    print("------------Preprocessing the datasets")
     # Preprocessing the datasets.
     train_transforms = transforms.Compose(
         [
@@ -889,6 +891,7 @@ def main():
         input_ids = torch.stack([example["input_ids"] for example in examples])
         return {"pixel_values": pixel_values, "input_ids": input_ids}
 
+    print("------------DataLoaders creation:")
     # DataLoaders creation:
     train_dataloader = torch.utils.data.DataLoader(
         train_dataset,
@@ -905,6 +908,7 @@ def main():
         args.max_train_steps = args.num_train_epochs * num_update_steps_per_epoch
         overrode_max_train_steps = True
 
+    print("------------get_scheduler")
     lr_scheduler = get_scheduler(
         args.lr_scheduler,
         optimizer=optimizer,
@@ -955,6 +959,7 @@ def main():
     # Potentially load in the weights and states from a previous save
     if args.resume_from_checkpoint:
         if args.resume_from_checkpoint == 'fromfacecommon':
+            print("------------snapshot_download damo/face_frombase_c4")
             weight_model_dir = snapshot_download('damo/face_frombase_c4',
                                                  revision='v1.0.0',
                                                  user_agent={'invoked_by': 'trainer', 'third_party': 'facechain'})
@@ -962,6 +967,7 @@ def main():
         elif args.resume_from_checkpoint != "latest":
             path = os.path.basename(args.resume_from_checkpoint)
         else:
+            print("------------Get the most recent checkpoint")
             # Get the most recent checkpoint
             dirs = os.listdir(args.output_dir)
             dirs = [d for d in dirs if d.startswith("checkpoint")]
@@ -975,12 +981,12 @@ def main():
             args.resume_from_checkpoint = None
         else:
             if args.resume_from_checkpoint == 'fromfacecommon':
-                accelerator.print(f"Resuming from checkpoint {path}")
+                accelerator.print(f"------------Resuming from checkpoint {path}")
                 unet_state_dict = torch.load(path, map_location='cpu')
                 accelerator._models[-1].load_state_dict(unet_state_dict)
                 global_step = 0
             else:
-                accelerator.print(f"Resuming from checkpoint {path}")
+                accelerator.print(f"------------accelerator.load_state( {path}")
                 accelerator.load_state(os.path.join(args.output_dir, path))
                 global_step = int(path.split("-")[1])
 

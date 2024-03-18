@@ -552,7 +552,7 @@ def main():
     accelerator_project_config = ProjectConfiguration(
         total_limit=args.checkpoints_total_limit, project_dir=args.output_dir, logging_dir=logging_dir
     )
-
+    print(f"初始化 accelerator")
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
@@ -595,6 +595,7 @@ def main():
             ).repo_id
 
     ## Download foundation Model
+    print(f"准备下载{args.pretrained_model_name_or_path}")
     model_dir = snapshot_download(args.pretrained_model_name_or_path,
                                   revision=args.revision,
                                   user_agent={'invoked_by': 'trainer', 'third_party': 'facechain'})

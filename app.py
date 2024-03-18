@@ -201,7 +201,8 @@ def train_lora_fn(base_model_path=None, revision=None, sub_path=None, output_img
                 f'--lora_text_encoder_r=32 '
                 f'--lora_text_encoder_alpha=32 '
                 #f'--use_swift '
-                f'--resume_from_checkpoint="fromfacecommon"')
+                # f'--resume_from_checkpoint="fromfacecommon"'
+                )
 
         if res != 0:
             raise gr.Error("训练失败 (Training failed)")
