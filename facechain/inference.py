@@ -509,7 +509,7 @@ def select_high_quality_face(input_img_dir):
             if face_quality_score is None:
                 quality_score_list.append(0)
             else:
-                quality_score_list.append(face_quality_score[0])
+                quality_score_list.append(face_quality_score)
             abs_img_path_list.append(abs_img_name)
 
     sort_idx = np.argsort(quality_score_list)[::-1]
