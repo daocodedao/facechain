@@ -21,7 +21,7 @@ from facechain.merge_lora import merge_lora
 from safetensors.torch import load_file, save_file
 from facechain.utils import getDevice
 from facelib import FaceDetector,AgeGenderEstimator
-from utilMergeFace import FaceSwap
+# from utilMergeFace import FaceSwap
 
 def _data_process_fn_process(input_img_dir):
     Blipv2()(input_img_dir)
@@ -523,12 +523,12 @@ def face_swap_fn(use_face_swap, gen_results, template_face):
         ## TODO
         out_img_list = []
         # faceSwap:FaceSwap = FaceSwap()
-        # image_face_fusion = pipeline('face_fusion_torch',
-                                    #  model='damo/cv_unet_face_fusion_torch', model_revision='v1.0.3')
+        image_face_fusion = pipeline('face_fusion_torch',
+                                     model='damo/cv_unet_face_fusion_torch', model_revision='v1.0.3')
         for img in gen_results:
-            # result = image_face_fusion(dict(template=img, user=template_face))[OutputKeys.OUTPUT_IMG]
+            result = image_face_fusion(dict(template=img, user=template_face))[OutputKeys.OUTPUT_IMG]
 
-            result = FaceSwap(template_face=template_face, user=img)
+            # result = FaceSwap(template_face=template_face, user=img)
             out_img_list.append(result)
 
         return out_img_list

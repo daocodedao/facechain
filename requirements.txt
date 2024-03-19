@@ -8,7 +8,7 @@ invisible-watermark>=0.2.0
 modelscope==1.10.0
 Pillow
 opencv-python
-torchvision
+
 mmdet==2.26.0
 mmengine
 numpy==1.22.0
@@ -21,14 +21,18 @@ mediapipe
 python-slugify
 edge-tts
 controlnet_aux==0.0.6
-# argparse
+
 SentencePiece
 dlib
-# facelib
+# 版本不能变
+torchvision==0.16
+
+
 git+https://github.com/sajjjadayobi/FaceLib.git
 # mmcv-full (need mim install)
 
 
 # https://mmdetection.readthedocs.io/en/v2.26.0/get_started.html
 # pip install -U openmim -i https://pypi.tuna.tsinghua.edu.cn/simple
+# mim install mmcv
 # mim install mmcv-full
