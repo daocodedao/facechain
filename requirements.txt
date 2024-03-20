@@ -34,5 +34,4 @@ git+https://github.com/sajjjadayobi/FaceLib.git
 
 # https://mmdetection.readthedocs.io/en/v2.26.0/get_started.html
 # pip install -U openmim -i https://pypi.tuna.tsinghua.edu.cn/simple
-# mim install mmcv
 # mim install mmcv-full
