@@ -1,13 +1,4 @@
-<p align="center">
-    <br>
-    <img src="https://modelscope.oss-cn-beijing.aliyuncs.com/modelscope.gif" width="400"/>
-    <br>
-    <h1>FaceChain</h1>
-<p>
-
-# Breaking News
-
-Our work [FaceChain-ImagineID](https://arxiv.org/abs/2403.01901) and [FaceChain-SuDe](https://arxiv.org/abs/2403.06775) got accepted to CVPR 2024 !
+# 一图出多图
 
 # Introduction
 
